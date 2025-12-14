@@ -129,6 +129,7 @@ def start_interview():
 @app.route('/api/analyze', methods=['GET', 'POST'])
 @app.route('/analyze_answer', methods=['GET', 'POST'])
 @app.route('/next', methods=['GET', 'POST']) 
+@app.route('/api/next', methods=['GET', 'POST']) # Added missing route
 def analyze_answer():
     data = request.json
     answer_text = data.get('answer_text') or data.get('answer')
