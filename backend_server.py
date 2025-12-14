@@ -1,11 +1,8 @@
 from flask import Flask, request, jsonify
 import json
 import os
-import sqlite3
-from datetime import datetime
+import requests
 from flask_cors import CORS
-from pyngrok import ngrok
-import google.generativeai as genai
 from dotenv import load_dotenv
 import sys
 
@@ -14,18 +11,58 @@ load_dotenv('.env.local')
 
 # Initialize Flask App
 app = Flask(__name__)
-CORS(app)
+CORS(app) # Allow all origins
 
-# Initialize Gemini Client (Native Google SDK)
-api_key = os.getenv('GEMINI_API_KEY')
-if api_key:
-    genai.configure(api_key=api_key)
-    # Use the available model alias
-    model = genai.GenerativeModel('gemini-flash-latest')
-    print("[OK] Gemini Client initialized (Native SDK)")
-else:
-    print("[WARNING] GEMINI_API_KEY not found. AI features will fail.")
-    model = None
+# Gemini API Config
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+
+def generate_ai_response(system_prompt, user_prompt, json_mode=True):
+    """Generate response using Direct REST API (Vercel Friendly)"""
+    if not GEMINI_API_KEY:
+        print("[ERROR] GEMINI_API_KEY not found", file=sys.stderr)
+        return None
+
+    try:
+        print(f"[AI] Calling Gemini REST API...", file=sys.stderr)
+        
+        # Construct the payload for Gemini 1.5 Flash
+        full_prompt = f"{system_prompt}\n\nUser Input: {user_prompt}\n\nIMPORTANT: Respond ONLY with valid JSON."
+        
+        payload = {
+            "contents": [{
+                "parts": [{"text": full_prompt}]
+            }],
+            "generationConfig": {
+                "response_mime_type": "application/json" if json_mode else "text/plain"
+            }
+        }
+        
+        headers = {'Content-Type': 'application/json'}
+        
+        response = requests.post(GEMINI_API_URL, headers=headers, json=payload, timeout=30)
+        response.raise_for_status() # Raise error for bad status codes
+        
+        result = response.json()
+        # Extract text from the complex JSON structure
+        content = result['candidates'][0]['content']['parts'][0]['text'].strip()
+        
+        print(f"[OK] Gemini Response: {content[:50]}...", file=sys.stderr)
+        
+        # Clean up markdown code blocks if present
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+            
+        return json.loads(content) if json_mode else content
+            
+    except Exception as e:
+        print(f"[ERROR] AI Error: {e}", file=sys.stderr)
+        # return None to let caller handle fallback
+        return None
 
 # ---------------- NO DATABASE (STATELESS VERCEL VERSION) ---------------- #
 
