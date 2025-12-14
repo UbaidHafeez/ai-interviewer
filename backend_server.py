@@ -27,88 +27,11 @@ else:
     print("[WARNING] GEMINI_API_KEY not found. AI features will fail.")
     model = None
 
-# ---------------- DATABASE SETUP ---------------- #
+# ---------------- NO DATABASE (STATELESS VERCEL VERSION) ---------------- #
 
-def get_db_connection():
-    conn = sqlite3.connect("database.db")
-    conn.row_factory = sqlite3.Row
-    return conn
-
-def init_db():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS webhook_data (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            data_json TEXT NOT NULL,
-            timestamp TEXT NOT NULL
-        )
-    ''')
-
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS sessions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            candidate_name TEXT,
-            topic TEXT,
-            start_time TEXT,
-            end_time TEXT,
-            score INTEGER,
-            report_json TEXT
-        )
-    ''')
-
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            session_id INTEGER,
-            sender TEXT,
-            text TEXT,
-            analysis_json TEXT,
-            timestamp TEXT,
-            FOREIGN KEY(session_id) REFERENCES sessions(id)
-        )
-    ''')
-    
-    conn.commit()
-    conn.close()
-
-init_db()
-
-# ---------------- HELPER FUNCTIONS ---------------- #
-
-def generate_ai_response(system_prompt, user_prompt, json_mode=True):
-    """Generate response using Native Gemini SDK"""
-    if not model:
-        print("[ERROR] Gemini model not initialized", file=sys.stderr)
-        return None
-    try:
-        print(f"[AI] Calling Gemini API...", file=sys.stderr)
-        
-        full_prompt = f"{system_prompt}\n\nUser Input: {user_prompt}\n\nIMPORTANT: Respond ONLY with valid JSON."
-        
-        response = model.generate_content(
-            full_prompt,
-            generation_config={"response_mime_type": "application/json"} if json_mode else {}
-        )
-        
-        print(f"[OK] Gemini Response Received", file=sys.stderr)
-        content = response.text.strip()
-        
-        # Clean up markdown code blocks if present
-        if content.startswith("```json"):
-            content = content[7:]
-        if content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
-            
-        return json.loads(content) if json_mode else content
-    except Exception as e:
-        print(f"[ERROR] AI Error: {e}", file=sys.stderr)
-        return None
-
-# ---------------- API ENDPOINTS ---------------- #
+@app.route('/', methods=['GET'])
+def home():
+    return "AI Interviewer Backend is Running on Vercel!"
 
 @app.route('/api/start', methods=['GET', 'POST'])
 @app.route('/start_interview', methods=['GET', 'POST'])
@@ -124,25 +47,6 @@ def start_interview():
     topic = data.get('topic', 'General Interview')
     language_code = data.get('language_code', 'en-US')
     resume_text = data.get('resume_text', '')
-
-    # Create Session
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO sessions (candidate_name, topic, start_time) VALUES (?, ?, ?)",
-        (candidate_name, topic, datetime.now().isoformat())
-    )
-    session_id = cursor.lastrowid
-    
-    # Persist Resume/Context as the first 'hidden' message so it's available in history
-    context_message = f"Context: Role: {topic}. Target Language: {language_code}. Resume/CV: {resume_text}"
-    cursor.execute(
-        "INSERT INTO messages (session_id, sender, text, timestamp) VALUES (?, ?, ?, ?)",
-        (session_id, 'system', context_message, datetime.now().isoformat())
-    )
-    
-    conn.commit()
-    conn.close()
 
     # Generate Initial Questions with Language Output
     system_prompt = f"""You are a professional, humanoid interview agent. 
@@ -174,59 +78,31 @@ def start_interview():
         
         ai_data = {
             "intro_message": fallback_msg,
-            "questions": [{"id": 1, "text": "Tell me about your experience."}],
             "language_code": language_code
         }
 
-    # Extract first question text safely
-    question_text = ai_data.get('intro_message', "Ready.")
-    # If there is a specific question list, maybe use that?
-    # Actually, let's just use the intro_message as the spoken text.
-    if ai_data.get('questions') and isinstance(ai_data['questions'], list) and len(ai_data['questions']) > 0:
-        # We might want the first question to simply be the language check.
-        # Let's trust the AI's intro_message which usually includes the question.
-        pass
-
     return jsonify({
-        "session_id": session_id,
+        "session_id": "vercel-stateless-session", 
         "intro_message": ai_data.get('intro_message'),
         "message": ai_data.get('intro_message'),
-        "question": ai_data.get('intro_message'), # Use intro as the first spoken text
-        "questions": ai_data.get('questions'),
-        "language_code": ai_data.get('language_code', 'en-US'),
-        "duration": 15,
-        "timeline_minutes": []
+        "question": ai_data.get('intro_message'),
+        "language_code": ai_data.get('language_code', 'en-US')
     })
 
 @app.route('/api/analyze', methods=['GET', 'POST'])
 @app.route('/analyze_answer', methods=['GET', 'POST'])
-@app.route('/next', methods=['GET', 'POST']) # Match frontend
+@app.route('/next', methods=['GET', 'POST']) 
 def analyze_answer():
     data = request.json
-    session_id = data.get('session_id', 1) # Default to 1 if missing
-    answer_text = data.get('answer_text') or data.get('answer') # Match frontend 'answer'
-    
-    # Save User Answer
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO messages (session_id, sender, text, timestamp) VALUES (?, ?, ?, ?)",
-        (session_id, 'user', answer_text, datetime.now().isoformat())
-    )
-    conn.commit()
-
-    # Fetch Conversation History for Context
-    cursor.execute("SELECT sender, text FROM messages WHERE session_id = ? ORDER BY id ASC", (session_id,))
-    history_rows = cursor.fetchall()
+    answer_text = data.get('answer_text') or data.get('answer')
+    history = data.get('history', []) # Expect frontend to send history
     
     # Format history for the AI
     history_text = ""
-    for row in history_rows:
-        if row['sender'] == 'system':
-            history_text += f"[System Context]: {row['text']}\n"
-        else:
-            role = "Candidate" if row['sender'] == 'user' else "Interviewer"
-            history_text += f"{role}: {row['text']}\n"
+    for msg in history:
+        role = msg.get('role', 'user')
+        content = msg.get('content', '')
+        history_text += f"{role.upper()}: {content}\n"
 
     # Analyze Answer with Context
     system_prompt = """You are a professional, humanoid interview agent.
@@ -234,7 +110,7 @@ def analyze_answer():
     
     Capabilities:
     1. Multi-language: ADAPT to the language found in the conversation history. If the context says 'Target Language: es-ES', speak Spanish.
-    2. Context: Use the conversation history (including Resume context) to ask relevant, probing questions.
+    2. Context: Use the conversation history to ask relevant, probing questions.
     
     Rules:
     - Acknowledge the answer deeply.
@@ -253,7 +129,7 @@ def analyze_answer():
     
     Current Answer: {answer_text}
     
-    Task: Respond naturally, switching language if requested, and ask the next question or give the first interview question.
+    Task: Respond naturally, switching language if requested, and ask the next question.
     """
     
     try:
@@ -263,27 +139,10 @@ def analyze_answer():
 
     if not ai_data:
         ai_data = {
-            "analysis": {"score": None, "feedback": None, "suggestions": []},
+            "analysis": {"score": None, "feedback": None},
             "next_question": "Could you elaborate on that?",
             "language_code": "en-US"
         }
-
-    # Save Analysis
-    cursor.execute(
-        "UPDATE messages SET analysis_json = ? WHERE session_id = ? AND text = ?",
-        (json.dumps(ai_data.get('analysis')), session_id, answer_text)
-    )
-    
-    # Save AI Response to History (So we have it for next time context)
-    ai_reply_text = ai_data.get('next_question')
-    if ai_reply_text:
-        cursor.execute(
-            "INSERT INTO messages (session_id, sender, text, timestamp) VALUES (?, ?, ?, ?)",
-            (session_id, 'ai', ai_reply_text, datetime.now().isoformat())
-        )
-
-    conn.commit()
-    conn.close()
 
     # Add 'reply' field for frontend
     ai_data['reply'] = ai_data.get('next_question')
@@ -295,14 +154,9 @@ def analyze_answer():
 def end_interview():
     print("[END] /end_interview called", file=sys.stderr)
     data = request.json or {}
-    session_id = data.get('session_id')
+    history = data.get('history', [])
     
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM messages WHERE session_id = ?", (session_id,))
-    messages = [dict(row) for row in cursor.fetchall()]
-    
-    transcript = [m['text'] for m in messages]
+    transcript = [msg.get('content') for msg in history]
     
     system_prompt = """You are an interview agent.
     Job: Generate a final report based on the transcript.
@@ -318,31 +172,14 @@ def end_interview():
 
     if not report_data:
         report_data = {"overall_score": 0, "summary": "Could not generate report."}
-
-    cursor.execute(
-        "UPDATE sessions SET end_time = ?, score = ?, report_json = ? WHERE id = ?",
-        (datetime.now().isoformat(), report_data.get('overall_score', 0), json.dumps(report_data), session_id)
-    )
-    conn.commit()
-    conn.close()
     
     return jsonify(report_data)
 
 @app.route('/api/history', methods=['GET'])
 def get_history():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM sessions ORDER BY start_time DESC")
-    sessions = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    return jsonify(sessions)
+    # Vercel stateless version has no persistent history
+    return jsonify([])
 
 if __name__ == '__main__':
-    print("[SERVER] Flask Server Starting...")
-    # Ngrok disabled
-    # try:
-    #     public_url = ngrok.connect(8000).public_url
-    #     print(f"[INFO] Public URL: {public_url}")
-    # except Exception as e:
-    #     print(f"[WARNING] Ngrok Error: {e}")
+    print("[SERVER] Flask Server Starting Local...")
     app.run(port=8000, debug=True)

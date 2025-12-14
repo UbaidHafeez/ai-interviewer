@@ -483,7 +483,10 @@
         lucide.createIcons();
 
         // API Configuration
-        const API_BASE = 'http://127.0.0.1:8000';
+        // API Configuration
+        // IF BACKEND IS on VERCEL: Put the Vercel URL here (e.g., https://my-app.vercel.app)
+        const API_BASE = 'https://YOUR-VERCEL-PROJECT.vercel.app';
+
 
         // DOM Elements
         const questionBox = document.getElementById('question-box');
@@ -724,13 +727,26 @@
         }
 
         // Renamed from startInterview to startInterviewBase to avoid confusion
+        // STATELESS HISTORY (Client-Side Memory)
+        let conversationHistory = [];
+
+        // Renamed from startInterview to startInterviewBase to avoid confusion
         async function startInterviewBase(payload = {}) {
             updateStatus('connecting');
             questionBox.innerHTML = '<span class="text-neutral-500 animate-pulse">Initializing interview context...</span>';
 
+            // RESET HISTORY
+            conversationHistory = [];
+
+            // Add initial context to history so it's tracked
+            conversationHistory.push({
+                role: 'system',
+                content: `Context: Role: ${payload.topic || 'General'}. Target Language: ${payload.language_code || 'en-US'}. Resume/CV: ${payload.resume_text || ''}`
+            });
+
             try {
                 // Use POST now to send the payload
-                const response = await fetch(`${API_BASE}/start_interview`, {
+                const response = await fetch(`${API_BASE}/api/start`, { // Updated endpoint path for Vercel
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -742,15 +758,23 @@
                 console.log('Start Response:', data);
                 sessionId = data.session_id;
 
+                // Save AI Welcome to history
+                if (data.intro_message) {
+                    conversationHistory.push({
+                        role: 'ai',
+                        content: data.intro_message
+                    });
+                }
+
                 // Handle Language
                 if (data.language_code) {
                     currentLang = data.language_code;
                     initRecognition(currentLang);
                 }
 
-                if (data.question) {
-                    typewriterEffect(data.question);
-                    if (currentMode === 'voice') speakText(data.question, currentLang);
+                if (data.intro_message) {
+                    typewriterEffect(data.intro_message);
+                    if (currentMode === 'voice') speakText(data.intro_message, currentLang);
 
                     enableInput();
                     if (endBtn) {
@@ -762,7 +786,7 @@
 
             } catch (error) {
                 console.error('Error:', error);
-                questionBox.innerHTML = '<span class="text-red-400 text-sm">Connection Failed. Ensure backend is accessible.</span>';
+                questionBox.innerHTML = '<span class="text-red-400 text-sm">Connection Failed. Check API_BASE in code.</span>';
                 updateStatus('disconnected');
             }
         }
@@ -780,13 +804,19 @@
             avatarPulse.style.opacity = '1';
             avatarPulse.classList.add('animate-ping');
 
+            // Add User Answer to History
+            conversationHistory.push({
+                role: 'user',
+                content: answer
+            });
+
             try {
-                const response = await fetch(`${API_BASE}/next`, {
+                const response = await fetch(`${API_BASE}/api/next`, { // Updated endpoint path for Vercel
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         answer: answer,
-                        session_id: sessionId
+                        history: conversationHistory // SEND HISTORY
                     })
                 });
 
@@ -801,13 +831,19 @@
                 }
 
                 if (data.reply) {
+                    // Add AI Reply to History
+                    conversationHistory.push({
+                        role: 'ai',
+                        content: data.reply
+                    });
+
                     typewriterEffect(data.reply);
                     if (currentMode === 'voice') {
                         speakText(data.reply, currentLang);
                     }
                 } else {
+                    // Fallback/Legacy
                     displaySummary(data);
-                    if (currentMode === 'voice') speakText("Here is your interview summary.", currentLang);
                 }
 
             } catch (error) {
@@ -988,7 +1024,9 @@
                 const response = await fetch(`${API_BASE}/api/end`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ session_id: sessionId })
+                    body: JSON.stringify({
+                        history: conversationHistory // SEND HISTORY
+                    })
                 });
 
                 const data = await response.json();
