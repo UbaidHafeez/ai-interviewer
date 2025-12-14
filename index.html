@@ -1,0 +1,1020 @@
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intrview - Intelligent Career Coaching</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            background-image: radial-gradient(circle at 50% 0%, rgba(120, 119, 198, 0.1) 0%, transparent 40%);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Utilities */
+        .glass {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .fade-enter {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Typing cursor effect */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s step-start infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Modal Styles */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: #0A0A0A;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            border-radius: 1rem;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-backdrop.active .modal-content {
+            transform: scale(1);
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #a3a3a3;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #525252;
+        }
+    </style>
+</head>
+
+<body
+    class="text-neutral-400 antialiased selection:bg-indigo-500/30 selection:text-indigo-200 min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 inset-x-0 z-50 border-b border-white/5 bg-[#050505]/80 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center gap-3 group cursor-pointer">
+                <div
+                    class="w-6 h-6 rounded bg-gradient-to-tr from-neutral-800 to-neutral-700 border border-white/10 flex items-center justify-center group-hover:border-indigo-500/50 transition-colors">
+                    <span class="text-white text-xs font-semibold tracking-tighter">I</span>
+                </div>
+                <span class="text-neutral-200 text-sm font-medium tracking-tight">Intrview</span>
+            </div>
+
+            <!-- Links -->
+            <div class="hidden md:flex items-center gap-6">
+                <a href="#" class="text-xs font-medium hover:text-white transition-colors">Methodology</a>
+                <a href="#" class="text-xs font-medium hover:text-white transition-colors">Enterprise</a>
+                <a href="#" class="text-xs font-medium hover:text-white transition-colors">Pricing</a>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-4">
+                <span class="text-xs font-medium hover:text-white transition-colors cursor-pointer">Log in</span>
+                <button onclick="document.getElementById('interview-interface').scrollIntoView({behavior: 'smooth'})"
+                    class="bg-white text-black px-3 py-1.5 rounded-full text-xs font-medium hover:bg-neutral-200 transition-colors">
+                    Start Practice
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Content -->
+    <main class="flex-grow pt-32 px-6 relative w-full max-w-6xl mx-auto">
+
+        <!-- Header Text -->
+        <div class="text-center mb-20">
+            <div
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/20 bg-indigo-500/10 mb-8">
+                <span class="relative flex h-1.5 w-1.5">
+                    <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-500"></span>
+                </span>
+                <span class="text-[10px] uppercase tracking-widest font-medium text-indigo-300">Beta Access</span>
+            </div>
+
+            <h1 class="text-5xl md:text-7xl font-medium tracking-tighter text-white mb-6 leading-[1.1] text-glow">
+                Master the interview.<br>
+                <span class="text-neutral-600">Before you step in.</span>
+            </h1>
+
+            <p class="text-base text-neutral-400 mb-10 max-w-lg mx-auto leading-relaxed">
+                AI-driven roleplay that adapts to your responses, providing real-time analytics on clarity, relevance,
+                and technical accuracy.
+            </p>
+
+            <div class="flex items-center justify-center gap-3">
+                <button onclick="openSetupModal()"
+                    class="bg-white text-neutral-950 px-6 py-2.5 rounded-full text-sm font-medium hover:bg-neutral-200 transition-all flex items-center gap-2 group shadow-[0_0_30px_-10px_rgba(255,255,255,0.3)]">
+                    <span>Begin Session</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform"
+                        stroke-width="1.5"></i>
+                </button>
+                <button
+                    class="px-6 py-2.5 rounded-full text-sm font-medium text-neutral-400 hover:text-white border border-transparent hover:border-white/10 hover:bg-white/5 transition-all">
+                    How it works
+                </button>
+            </div>
+        </div>
+
+        <!-- App Interface -->
+        <div id="interview-interface" class="relative max-w-5xl mx-auto mb-32 scroll-mt-24">
+            <!-- Glow Effect behind container -->
+            <div
+                class="absolute -inset-0.5 bg-gradient-to-b from-indigo-500/20 to-purple-500/0 rounded-xl blur-lg opacity-50">
+            </div>
+
+            <!-- Main Window -->
+            <div
+                class="relative bg-[#0A0A0A] border border-white/10 rounded-xl shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px]">
+
+                <!-- Left: Chat Area -->
+                <div class="flex-1 flex flex-col relative z-10">
+                    <!-- Window Controls (Decoration) -->
+                    <div class="h-12 border-b border-white/5 flex items-center justify-between px-6 bg-[#0A0A0A]/50">
+                        <div class="flex gap-2">
+                            <div class="w-3 h-3 rounded-full bg-neutral-800 border border-white/5"></div>
+                            <div class="w-3 h-3 rounded-full bg-neutral-800 border border-white/5"></div>
+                        </div>
+
+                        <!-- Mode Toggle -->
+                        <div id="mode-toggle-container"
+                            class="flex bg-neutral-900/50 rounded-lg p-0.5 border border-white/5">
+                            <button onclick="toggleMode('typing')"
+                                class="px-3 py-1 rounded-md text-[10px] font-medium transition-all bg-white/10 text-white">Typing</button>
+                            <button onclick="toggleMode('voice')"
+                                class="px-3 py-1 rounded-md text-[10px] font-medium transition-all text-neutral-500 hover:text-neutral-300">Voice</button>
+                        </div>
+
+                        <div id="connection-status"
+                            class="text-[10px] font-mono text-neutral-600 flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-700"></span> Disconnected
+                        </div>
+                    </div>
+
+                    <!-- Conversation Flow -->
+                    <div
+                        class="flex-1 p-8 md:p-12 flex flex-col justify-center items-center overflow-y-auto custom-scrollbar">
+
+                        <!-- AI Avatar -->
+                        <div class="relative w-16 h-16 mb-8 group">
+                            <div id="avatar-pulse"
+                                class="absolute inset-0 bg-indigo-500/20 rounded-full blur-md opacity-0 transition-opacity duration-500">
+                            </div>
+                            <div
+                                class="relative w-full h-full bg-neutral-900 border border-white/10 rounded-full flex items-center justify-center shadow-lg">
+                                <i data-lucide="bot" class="w-7 h-7 text-indigo-400" stroke-width="1.5"></i>
+                            </div>
+                        </div>
+
+                        <!-- Question Display -->
+                        <div class="w-full max-w-xl text-center space-y-4">
+                            <h2 id="question-box"
+                                class="text-xl md:text-2xl font-medium text-white tracking-tight leading-snug min-h-[3rem]">
+                                Press "Begin Session" to initialize the AI interviewer.
+                            </h2>
+                            <p id="status-indicator"
+                                class="text-xs font-mono text-indigo-400 opacity-0 transition-opacity duration-300">
+                                Analyzing response...
+                            </p>
+                        </div>
+
+                        <!-- Spacer -->
+                        <div class="flex-grow"></div>
+
+                        <!-- BIG End Interview Button -->
+                        <div class="w-full max-w-2xl mt-8">
+                            <button id="end-btn" onclick="endInterview()" disabled
+                                class="w-full py-3.5 px-6 bg-red-600/10 border-2 border-red-500/30 text-red-400 rounded-lg text-sm font-semibold hover:bg-red-600/20 hover:border-red-500/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg">
+                                <i data-lucide="square" class="w-4 h-4"></i>
+                                <span>End Interview &amp; Get Report</span>
+                            </button>
+                        </div>
+
+                        <!-- Input Area -->
+                        <div class="w-full max-w-2xl mt-8 relative group">
+                            <!-- Typing Controls -->
+                            <div id="typing-controls">
+                                <div
+                                    class="absolute -inset-px bg-gradient-to-r from-indigo-500/30 via-purple-500/30 to-indigo-500/30 rounded-lg opacity-0 group-focus-within:opacity-100 transition duration-500 blur-sm">
+                                </div>
+                                <div
+                                    class="relative bg-[#0F0F0F] border border-white/10 rounded-lg p-1.5 flex items-end gap-2 shadow-inner transition-colors focus-within:border-white/20 focus-within:bg-neutral-900">
+                                    <textarea id="answer-input" rows="1" placeholder="Type your answer..."
+                                        class="w-full bg-transparent text-sm text-neutral-200 placeholder-neutral-600 px-3 py-2.5 focus:outline-none resize-none max-h-32"
+                                        oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"
+                                        onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); submitAnswer(); }"
+                                        disabled=""></textarea>
+                                    <button id="send-btn" onclick="submitAnswer()" disabled=""
+                                        class="p-2 bg-white text-black rounded hover:bg-neutral-200 disabled:opacity-20 disabled:cursor-not-allowed transition-all mb-0.5">
+                                        <i data-lucide="arrow-up" class="w-4 h-4" stroke-width="2"></i>
+                                    </button>
+                                </div>
+                                <div class="flex justify-between items-center px-1 mt-2">
+                                    <span class="text-[10px] text-neutral-600">Markdown supported</span>
+                                    <span class="text-[10px] text-neutral-600">Enter to send</span>
+                                </div>
+                            </div>
+
+                            <!-- Voice Controls (Hidden by default) -->
+                            <div id="voice-controls" class="hidden flex flex-col items-center justify-center py-4">
+                                <button id="mic-btn" onclick="toggleListening()"
+                                    class="w-16 h-16 rounded-full bg-neutral-800 border border-white/10 flex items-center justify-center transition-all hover:bg-neutral-700 shadow-lg relative group overflow-hidden">
+                                    <!-- Ripple/Pulse Effect -->
+                                    <span
+                                        class="absolute inset-0 bg-red-500/20 rounded-full animate-ping opacity-0 group-hover:opacity-10 transition-opacity"></span>
+                                    <i id="mic-icon" data-lucide="mic" class="w-6 h-6 text-white transition-colors"></i>
+                                </button>
+                                <span id="mic-status-text" class="mt-4 text-xs font-medium text-neutral-400">Tap to
+                                    Speak</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Analytics Sidebar -->
+                <div class="w-full md:w-80 bg-[#080808] border-l border-white/5 flex flex-col">
+                    <div class="p-6 border-b border-white/5">
+                        <span class="text-xs font-medium text-white uppercase tracking-widest opacity-60">Live
+                            Metrics</span>
+                    </div>
+
+                    <div class="p-6 space-y-8">
+                        <!-- Metric 1 -->
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-neutral-400">Structural Clarity</span>
+                                <span class="text-emerald-400 font-mono">85%</span>
+                            </div>
+                            <div class="h-1 w-full bg-neutral-800 rounded-full overflow-hidden">
+                                <div
+                                    class="h-full bg-emerald-500/80 w-[85%] rounded-full shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Metric 2 -->
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-neutral-400">Keyword Relevance</span>
+                                <span class="text-indigo-400 font-mono">64%</span>
+                            </div>
+                            <div class="h-1 w-full bg-neutral-800 rounded-full overflow-hidden">
+                                <div
+                                    class="h-full bg-indigo-500/80 w-[64%] rounded-full shadow-[0_0_10px_rgba(99,102,241,0.3)]">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tip Box -->
+                        <div class="mt-8 p-4 rounded-lg bg-white/5 border border-white/5">
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-amber-400 mt-0.5" stroke-width="1.5"></i>
+                                <div>
+                                    <h4 class="text-xs font-medium text-white mb-1">Pro Tip</h4>
+                                    <p class="text-xs text-neutral-500 leading-relaxed">
+                                        Use the STAR method: Situation, Task, Action, Result. Keep your "Action" section
+                                        the most detailed.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature Grid -->
+        <div class="grid md:grid-cols-3 gap-8 mb-32 border-t border-white/5 pt-16">
+            <div class="group">
+                <i data-lucide="zap" class="w-6 h-6 text-white mb-4 group-hover:text-indigo-400 transition-colors"
+                    stroke-width="1.5"></i>
+                <h3 class="text-white font-medium text-sm mb-2">Real-time Latency</h3>
+                <p class="text-xs text-neutral-500 leading-relaxed">
+                    Voice-to-text and text-to-voice pipelines optimized for sub-500ms conversation loops.
+                </p>
+            </div>
+            <div class="group">
+                <i data-lucide="bar-chart-3"
+                    class="w-6 h-6 text-white mb-4 group-hover:text-indigo-400 transition-colors"
+                    stroke-width="1.5"></i>
+                <h3 class="text-white font-medium text-sm mb-2">Detailed Reports</h3>
+                <p class="text-xs text-neutral-500 leading-relaxed">
+                    Post-interview analysis highlights linguistic patterns, filler words, and technical gaps.
+                </p>
+            </div>
+            <div class="group">
+                <i data-lucide="shield" class="w-6 h-6 text-white mb-4 group-hover:text-indigo-400 transition-colors"
+                    stroke-width="1.5"></i>
+                <h3 class="text-white font-medium text-sm mb-2">Local Privacy</h3>
+                <p class="text-xs text-neutral-500 leading-relaxed">
+                    Conversations are processed in isolated containers. No data is used for model training.
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-12 bg-[#050505]">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity">
+                <div class="w-4 h-4 rounded-sm bg-neutral-800 flex items-center justify-center">
+                    <span class="text-[8px] text-white font-bold">I</span>
+                </div>
+                <span class="text-xs font-medium text-white">Intrview Inc.</span>
+            </div>
+            <div class="flex gap-6">
+                <a href="#" class="text-[10px] text-neutral-500 hover:text-white transition-colors">Privacy</a>
+                <a href="#" class="text-[10px] text-neutral-500 hover:text-white transition-colors">Terms</a>
+                <a href="#" class="text-[10px] text-neutral-500 hover:text-white transition-colors">Twitter</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Setup Modal -->
+    <div id="setup-modal" class="modal-backdrop">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-semibold text-white">Interview Setup</h2>
+                <button onclick="closeSetupModal()" class="text-neutral-500 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="space-y-5">
+                <!-- Profession -->
+                <div class="form-group">
+                    <label>Target Role / Profession</label>
+                    <input type="text" id="setup-role" class="form-input"
+                        placeholder="e.g. Senior Software Engineer, Product Manager" value="Software Engineer">
+                </div>
+
+                <!-- Language -->
+                <div class="form-group">
+                    <label>Preferred Language</label>
+                    <select id="setup-language" class="form-input text-neutral-200">
+                        <option value="en-US">English (native)</option>
+                        <option value="es-ES">Spanish (Español)</option>
+                        <option value="fr-FR">French (Français)</option>
+                        <option value="de-DE">German (Deutsch)</option>
+                        <option value="hi-IN">Hindi (हिन्दी)</option>
+                        <option value="zh-CN">Chinese (中文)</option>
+                        <option value="ja-JP">Japanese (日本語)</option>
+                    </select>
+                </div>
+
+                <!-- Resume -->
+                <div class="form-group">
+                    <label>Paste Resume / CV (Optional)</label>
+                    <textarea id="setup-resume" class="form-input min-h-[120px] resize-none"
+                        placeholder="Paste the text content of your resume here to let the AI tailor questions to your experience..."></textarea>
+                </div>
+
+                <button onclick="confirmSetupAndStart()"
+                    class="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-500 transition-colors flex items-center justify-center gap-2 mt-2">
+                    Start Interview
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // API Configuration
+        const API_BASE = 'http://127.0.0.1:8000';
+
+        // DOM Elements
+        const questionBox = document.getElementById('question-box');
+        const answerInput = document.getElementById('answer-input');
+        const sendBtn = document.getElementById('send-btn');
+        const endBtn = document.getElementById('end-btn');
+        const statusIndicator = document.getElementById('status-indicator');
+        const connectionStatus = document.getElementById('connection-status');
+        const avatarPulse = document.getElementById('avatar-pulse');
+
+        // Mode Management
+        let currentMode = 'typing';
+        let currentLang = 'en-US';
+        let recognition = null;
+        let isListening = false;
+        let isSpeaking = false;
+        const synth = window.speechSynthesis;
+
+        // Modal Logic
+        function openSetupModal() {
+            document.getElementById('setup-modal').classList.add('active');
+        }
+
+        function closeSetupModal() {
+            document.getElementById('setup-modal').classList.remove('active');
+        }
+
+        async function confirmSetupAndStart() {
+            const role = document.getElementById('setup-role').value;
+            const language = document.getElementById('setup-language').value;
+            const resume = document.getElementById('setup-resume').value;
+
+            if (!role) {
+                alert("Please enter a target role.");
+                return;
+            }
+
+            closeSetupModal();
+            currentLang = language; // Set preferred language immediately
+
+            // Scroll to interface
+            document.getElementById('interview-interface').scrollIntoView({ behavior: 'smooth' });
+
+            // Start the interview with these parameters
+            await startInterviewBase({
+                topic: role,
+                language_code: language,
+                resume_text: resume
+            });
+        }
+
+
+        // Initialize Speech Recognition
+        function initRecognition(langCode = 'en-US') {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+                if (recognition) {
+                    try { recognition.abort(); } catch (e) { }
+                }
+
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.lang = langCode;
+                console.log(`[Voice] Recognition initialized for: ${langCode}`);
+
+                recognition.onstart = () => {
+                    isListening = true;
+                    updateMicStatus('listening');
+                };
+
+                recognition.onend = () => {
+                    isListening = false;
+                    updateMicStatus('idle');
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = Array.from(event.results)
+                        .map(result => result[0].transcript)
+                        .join('');
+
+                    if (answerInput) {
+                        answerInput.value = transcript;
+                    }
+
+                    if (event.results[0].isFinal) {
+                        setTimeout(() => {
+                            submitAnswer();
+                        }, 1000);
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error', event.error);
+                    isListening = false;
+                    updateMicStatus('error');
+                };
+            }
+        }
+
+        initRecognition('en-US');
+
+        let isProcessing = false;
+        let sessionId = null;
+
+        function toggleMode(mode) {
+            currentMode = mode;
+            const toggleContainer = document.getElementById('mode-toggle-container');
+            const typingControls = document.getElementById('typing-controls');
+            const voiceControls = document.getElementById('voice-controls');
+
+            // Visual Update for Toggle
+            const btns = toggleContainer.getElementsByTagName('button');
+            if (mode === 'typing') {
+                btns[0].classList.add('bg-white/10', 'text-white');
+                btns[0].classList.remove('text-neutral-500', 'hover:text-neutral-300');
+                btns[1].classList.remove('bg-white/10', 'text-white');
+                btns[1].classList.add('text-neutral-500', 'hover:text-neutral-300');
+
+                typingControls.classList.remove('hidden');
+                voiceControls.classList.add('hidden');
+
+                if (isListening) stopListening();
+                if (isSpeaking) synth.cancel();
+            } else {
+                btns[1].classList.add('bg-white/10', 'text-white');
+                btns[1].classList.remove('text-neutral-500', 'hover:text-neutral-300');
+                btns[0].classList.remove('bg-white/10', 'text-white');
+                btns[0].classList.add('text-neutral-500', 'hover:text-neutral-300');
+
+                typingControls.classList.add('hidden');
+                voiceControls.classList.remove('hidden');
+            }
+        }
+
+        function toggleListening() {
+            if (!recognition) {
+                alert('Speech recognition not supported in this browser. Please use Chrome or Edge.');
+                return;
+            }
+
+            if (isListening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        }
+
+        function startListening() {
+            try {
+                recognition.start();
+                updateMicStatus('listening');
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function stopListening() {
+            try {
+                recognition.stop();
+                updateMicStatus('idle');
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function updateMicStatus(state) {
+            const micBtn = document.getElementById('mic-btn');
+            const micIcon = document.getElementById('mic-icon');
+            const micStatusText = document.getElementById('mic-status-text');
+
+            if (state === 'listening') {
+                micBtn.classList.add('bg-red-500/20', 'border-red-500/50', 'animate-pulse');
+                micBtn.classList.remove('bg-neutral-800', 'border-white/10');
+                micIcon.classList.add('text-red-400');
+                micIcon.classList.remove('text-white');
+                micStatusText.innerText = 'Listening...';
+            } else if (state === 'error') {
+                micStatusText.innerText = 'Error accessing mic';
+                setTimeout(() => updateMicStatus('idle'), 2000);
+            } else {
+                micBtn.classList.remove('bg-red-500/20', 'border-red-500/50', 'animate-pulse');
+                micBtn.classList.add('bg-neutral-800', 'border-white/10');
+                micIcon.classList.remove('text-red-400');
+                micIcon.classList.add('text-white');
+                micStatusText.innerText = 'Tap to Speak';
+            }
+        }
+
+        function speakText(text, langCode = 'en-US') {
+            if (currentMode !== 'voice') return;
+            if (synth.speaking) synth.cancel();
+
+            // Strip markdown/html tags for speech
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = text;
+            const cleanText = tempDiv.textContent || tempDiv.innerText || "";
+
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            const voices = synth.getVoices();
+
+            // Smarter Voice Selection
+            // 1. Match Exact Language
+            let availableVoices = voices.filter(v => v.lang.startsWith(langCode.split('-')[0]));
+
+            // 2. Look for Premium Keywords
+            let preferredVoice = availableVoices.find(v =>
+                v.name.includes('Google') ||
+                v.name.includes('Neural') ||
+                v.name.includes('Natural') ||
+                v.name.includes('Premium')
+            );
+
+            // 3. Fallback to just matching language or default
+            if (!preferredVoice && availableVoices.length > 0) preferredVoice = availableVoices[0];
+
+            if (preferredVoice) {
+                utterance.voice = preferredVoice;
+                console.log(`[Voice] Speaking with: ${preferredVoice.name} (${preferredVoice.lang})`);
+            } else {
+                console.warn(`[Voice] No voice found for ${langCode}, using default.`);
+            }
+
+            // Adjust rate/pitch for "Professional" feel
+            utterance.rate = 0.95; // Slightly slower
+            utterance.pitch = 0.9; // Slightly deeper if possible (though browser specific)
+
+            isSpeaking = true;
+            avatarPulse.classList.add('animate-ping');
+
+            utterance.onend = () => {
+                isSpeaking = false;
+                avatarPulse.classList.remove('animate-ping');
+            };
+
+            synth.speak(utterance);
+        }
+
+        // Renamed from startInterview to startInterviewBase to avoid confusion
+        async function startInterviewBase(payload = {}) {
+            updateStatus('connecting');
+            questionBox.innerHTML = '<span class="text-neutral-500 animate-pulse">Initializing interview context...</span>';
+
+            try {
+                // Use POST now to send the payload
+                const response = await fetch(`${API_BASE}/start_interview`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('API connection failed');
+
+                const data = await response.json();
+                console.log('Start Response:', data);
+                sessionId = data.session_id;
+
+                // Handle Language
+                if (data.language_code) {
+                    currentLang = data.language_code;
+                    initRecognition(currentLang);
+                }
+
+                if (data.question) {
+                    typewriterEffect(data.question);
+                    if (currentMode === 'voice') speakText(data.question, currentLang);
+
+                    enableInput();
+                    if (endBtn) {
+                        endBtn.disabled = false;
+                        endBtn.removeAttribute('disabled');
+                    }
+                    updateStatus('connected');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                questionBox.innerHTML = '<span class="text-red-400 text-sm">Connection Failed. Ensure backend is accessible.</span>';
+                updateStatus('disconnected');
+            }
+        }
+
+        // Wrap original submit
+        async function submitAnswer() {
+            const answer = answerInput.value.trim();
+            if (!answer || isProcessing) return;
+
+            isProcessing = true;
+            disableInput();
+            if (currentMode === 'voice') stopListening();
+
+            statusIndicator.style.opacity = '1';
+            avatarPulse.style.opacity = '1';
+            avatarPulse.classList.add('animate-ping');
+
+            try {
+                const response = await fetch(`${API_BASE}/next`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        answer: answer,
+                        session_id: sessionId
+                    })
+                });
+
+                const data = await response.json();
+                answerInput.value = '';
+                answerInput.style.height = 'auto';
+
+                if (data.language_code && data.language_code !== currentLang) {
+                    console.log(`[Voice] Switching language to: ${data.language_code}`);
+                    currentLang = data.language_code;
+                    initRecognition(currentLang);
+                }
+
+                if (data.reply) {
+                    typewriterEffect(data.reply);
+                    if (currentMode === 'voice') {
+                        speakText(data.reply, currentLang);
+                    }
+                } else {
+                    displaySummary(data);
+                    if (currentMode === 'voice') speakText("Here is your interview summary.", currentLang);
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                statusIndicator.innerText = "Transmission Error";
+                statusIndicator.classList.add('text-red-500');
+            } finally {
+                isProcessing = false;
+                statusIndicator.style.opacity = '0';
+                if (!isSpeaking) {
+                    avatarPulse.style.opacity = '0';
+                    avatarPulse.classList.remove('animate-ping');
+                }
+
+                if (!document.getElementById('summary-container')) {
+                    enableInput();
+                    if (currentMode === 'typing') {
+                        setTimeout(() => answerInput.focus(), 100);
+                    }
+                }
+            }
+        }
+
+        function typewriterEffect(text) {
+            questionBox.innerHTML = '';
+            questionBox.classList.add('typing-cursor');
+            let i = 0;
+            const speed = 20;
+
+            function type() {
+                if (i < text.length) {
+                    questionBox.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    questionBox.classList.remove('typing-cursor');
+                }
+            }
+            type();
+        }
+
+        function displaySummary(data) {
+            const containerId = 'summary-container';
+
+            function formatAsList(items) {
+                if (Array.isArray(items)) {
+                    return '<ul class="list-disc list-inside space-y-2">' +
+                        items.map(item => `<li>${item}</li>`).join('') +
+                        '</ul>';
+                } else if (typeof items === 'string') {
+                    return `<p>${items}</p>`;
+                }
+                return '<p>No data available.</p>';
+            }
+
+            let html = `
+            <div id="${containerId}" class="w-full text-left space-y-6 fade-enter max-w-2xl mx-auto">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="h-px bg-white/10 flex-grow"></div>
+                    <span class="text-xs uppercase tracking-widest text-white font-semibold">Performance Report</span>
+                    <div class="h-px bg-white/10 flex-grow"></div>
+                </div>
+            `;
+
+            if (data.overall_score !== undefined) {
+                const score = data.overall_score;
+                const scoreColor = score >= 7 ? 'emerald' : score >= 4 ? 'amber' : 'red';
+                html += `
+                <div class="text-center p-6 rounded-lg bg-${scoreColor}-500/10 border border-${scoreColor}-500/30 mb-6">
+                    <div class="text-5xl font-bold text-${scoreColor}-400 mb-2">${score}/10</div>
+                    <div class="text-sm text-neutral-400">Overall Performance</div>
+                </div>`;
+            }
+
+            if (data.summary) {
+                html += `
+                <div class="p-5 rounded-lg bg-white/5 border border-white/10 mb-4">
+                    <h3 class="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                        <i data-lucide="file-text" class="w-4 h-4 text-indigo-400"></i> Summary
+                    </h3>
+                    <p class="text-sm text-neutral-300 leading-relaxed">${data.summary}</p>
+                </div>`;
+            }
+
+            if (data.strengths) {
+                html += `
+                <div class="group border border-emerald-500/20 bg-emerald-500/5 rounded-lg p-5 hover:border-emerald-500/30 transition-colors">
+                    <h3 class="text-sm font-semibold text-emerald-400 mb-3 uppercase tracking-wide flex items-center gap-2">
+                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> What You Did Well
+                    </h3>
+                    <div class="text-sm text-neutral-300 leading-relaxed">
+                        ${formatAsList(data.strengths)}
+                    </div>
+                </div>`;
+            }
+
+            if (data.weaknesses) {
+                html += `
+                <div class="group border border-amber-500/20 bg-amber-500/5 rounded-lg p-5 hover:border-amber-500/30 transition-colors">
+                    <h3 class="text-sm font-semibold text-amber-400 mb-3 uppercase tracking-wide flex items-center gap-2">
+                        <i data-lucide="target" class="w-4 h-4"></i> Areas to Improve
+                    </h3>
+                    <div class="text-sm text-neutral-300 leading-relaxed">
+                        ${formatAsList(data.weaknesses)}
+                    </div>
+                </div>`;
+            }
+
+            if (data.action_plan) {
+                html += `
+                <div class="group border border-indigo-500/20 bg-indigo-500/5 rounded-lg p-5 hover:border-indigo-500/30 transition-colors">
+                    <h3 class="text-sm font-semibold text-indigo-400 mb-3 uppercase tracking-wide flex items-center gap-2">
+                        <i data-lucide="rocket" class="w-4 h-4"></i> Action Plan
+                    </h3>
+                    <div class="text-sm text-neutral-300 leading-relaxed">
+                        ${formatAsList(data.action_plan)}
+                    </div>
+                </div>`;
+            }
+
+            if (!data.strengths && !data.weaknesses && !data.summary && !data.reply) {
+                html += `<p class="text-sm text-neutral-400 text-center p-6 bg-white/5 rounded-lg">Report data: ${JSON.stringify(data, null, 2)}</p>`;
+            }
+
+            html += `
+                <button onclick="location.reload()" class="mt-8 w-full py-3.5 bg-white text-black rounded-lg text-sm font-semibold hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    Start New Interview
+                </button>
+            </div>`;
+
+            questionBox.parentElement.innerHTML = html;
+            lucide.createIcons();
+            disableInput();
+            document.querySelector('.input-area-wrapper')?.classList.add('opacity-50', 'pointer-events-none');
+            document.getElementById('mode-toggle-container').style.display = 'none';
+        }
+
+        function enableInput() {
+            answerInput.disabled = false;
+            sendBtn.disabled = false;
+            if (endBtn) endBtn.disabled = false;
+            if (currentMode === 'typing') answerInput.focus();
+        }
+
+        function disableInput() {
+            answerInput.disabled = true;
+            sendBtn.disabled = true;
+        }
+
+        async function endInterview() {
+            console.log('End Interview clicked! SessionId:', sessionId, 'isProcessing:', isProcessing);
+
+            if (!sessionId) {
+                alert('[ERROR] No active session found!\n\nPlease start an interview first by clicking "Begin Session".');
+                return;
+            }
+
+            if (isProcessing) {
+                alert('[WAIT] Please wait...\n\nStill processing your previous answer.');
+                return;
+            }
+
+            if (!confirm('[CONFIRM] End Interview?\n\nAre you sure you want to finish and get your performance report?')) {
+                return;
+            }
+
+            isProcessing = true;
+            disableInput();
+            if (endBtn) {
+                endBtn.disabled = true;
+                endBtn.style.opacity = '0.3';
+            }
+
+            questionBox.innerHTML = '<span class="text-neutral-500 animate-pulse">Generating your comprehensive report...</span>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/end`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId })
+                });
+
+                const data = await response.json();
+                console.log('End Response:', data);
+
+                displaySummary(data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                questionBox.innerHTML = '<span class="text-red-400">Failed to generate report. Please try again.</span>';
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        function updateStatus(status) {
+            if (status === 'connected') {
+                connectionStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> <span class="text-emerald-500">Live Connection</span>`;
+            } else if (status === 'connecting') {
+                connectionStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> <span class="text-amber-500">Connecting...</span>`;
+            } else {
+                connectionStatus.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> <span class="text-neutral-500">Offline</span>`;
+            }
+        }
+    </script>
+
+</body>
+
+</html>
