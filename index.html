@@ -1,9 +1,45 @@
+<!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intrview - Intelligent Career Coaching</title>
+
+    <!-- Primary Meta Tags -->
+    <title>Intrview - AI Interview Practice | Career Coaching Platform</title>
+    <meta name="title" content="Intrview - AI Interview Practice | Career Coaching Platform">
+    <meta name="description"
+        content="Master your job interviews with AI-driven roleplay. Real-time voice interaction, instant feedback, and detailed analytics. Practice technical and behavioral interviews 24/7.">
+    <meta name="keywords"
+        content="AI interview, interview practice, career coaching, job interview, mock interview, voice AI, interview preparation, technical interview, behavioral interview">
+    <meta name="author" content="Intrview">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://intrview.app">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://intrview.app/">
+    <meta property="og:title" content="Intrview - AI Interview Practice | Career Coaching Platform">
+    <meta property="og:description"
+        content="Master your job interviews with AI-driven roleplay. Real-time voice interaction, instant feedback, and detailed analytics.">
+    <meta property="og:image" content="https://intrview.app/og-image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://intrview.app/">
+    <meta property="twitter:title" content="Intrview - AI Interview Practice | Career Coaching Platform">
+    <meta property="twitter:description"
+        content="Master your job interviews with AI-driven roleplay. Real-time voice interaction, instant feedback, and detailed analytics.">
+    <meta property="twitter:image" content="https://intrview.app/og-image.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+
+    <!-- Preconnect to external resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -318,6 +354,18 @@
 
                             <!-- Voice Controls (Hidden by default) -->
                             <div id="voice-controls" class="hidden flex flex-col items-center justify-center py-4">
+                                <!-- ElevenLabs Status Badge -->
+                                <div
+                                    class="mb-3 px-3 py-1.5 rounded-full border border-white/5 bg-neutral-900/80 flex items-center gap-2">
+                                    <span class="relative flex h-2 w-2">
+                                        <span
+                                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                    </span>
+                                    <span class="text-[9px] font-medium text-neutral-400">ElevenLabs Voice: <span
+                                            id="voice-name-display" class="text-neutral-300">Rachel</span></span>
+                                </div>
+
                                 <button id="mic-btn" onclick="toggleListening()"
                                     class="w-16 h-16 rounded-full bg-neutral-800 border border-white/10 flex items-center justify-center transition-all hover:bg-neutral-700 shadow-lg relative group overflow-hidden">
                                     <!-- Ripple/Pulse Effect -->
@@ -471,6 +519,26 @@
                         placeholder="Paste the text content of your resume here to let the AI tailor questions to your experience..."></textarea>
                 </div>
 
+                <!-- Voice Selection -->
+                <div class="form-group">
+                    <label>AI Voice (ElevenLabs)</label>
+                    <select id="setup-voice" class="form-input text-neutral-200">
+                        <option value="Rachel">Rachel (Professional, Warm)</option>
+                        <option value="Drew">Drew (Mature, Authoritative)</option>
+                        <option value="Clyde">Clyde (Deep, Powerful)</option>
+                        <option value="Paul">Paul (Clear, News Anchor)</option>
+                        <option value="Domi">Domi (Young, Energetic)</option>
+                        <option value="Dave">Dave (Calm, Narrator)</option>
+                        <option value="Bella">Bella (Gentle, Soft)</option>
+                        <option value="Antoni">Antoni (Smooth, Confident)</option>
+                        <option value="Thomas">Thomas (British, Professional)</option>
+                        <option value="Emily">Emily (Calm, Soothing)</option>
+                        <option value="Josh">Josh (Young, Casual)</option>
+                        <option value="Adam">Adam (Narrator, Deep)</option>
+                        <option value="Nicole">Nicole (Calm, Professional)</option>
+                    </select>
+                </div>
+
                 <button onclick="confirmSetupAndStart()"
                     class="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-500 transition-colors flex items-center justify-center gap-2 mt-2">
                     Start Interview
@@ -483,7 +551,7 @@
         lucide.createIcons();
 
         // API Configuration
-        const API_BASE = 'https://ai-interviewer-g7dl-2k0rqiq5p-ubaidhafeezs-projects.vercel.app';
+        const API_BASE = window.location.origin; // Supports cloud deployment
 
 
         // DOM Elements
@@ -516,11 +584,15 @@
             const role = document.getElementById('setup-role').value;
             const language = document.getElementById('setup-language').value;
             const resume = document.getElementById('setup-resume').value;
+            const voice = document.getElementById('setup-voice').value;
 
             if (!role) {
                 alert("Please enter a target role.");
                 return;
             }
+
+            // Set selected voice
+            selectedVoice = voice;
 
             closeSetupModal();
             currentLang = language; // Set preferred language immediately
@@ -596,6 +668,12 @@
             const toggleContainer = document.getElementById('mode-toggle-container');
             const typingControls = document.getElementById('typing-controls');
             const voiceControls = document.getElementById('voice-controls');
+            const voiceNameDisplay = document.getElementById('voice-name-display');
+
+            // Update voice name display
+            if (voiceNameDisplay) {
+                voiceNameDisplay.textContent = selectedVoice;
+            }
 
             // Visual Update for Toggle
             const btns = toggleContainer.getElementsByTagName('button');
@@ -675,8 +753,13 @@
             }
         }
 
+        // ElevenLabs Voice Selection
+        let selectedVoice = 'Rachel'; // Default voice
+
         function speakText(text, langCode = 'en-US') {
             if (currentMode !== 'voice') return;
+
+            // Stop any ongoing speech
             if (synth.speaking) synth.cancel();
 
             // Strip markdown/html tags for speech
@@ -684,14 +767,71 @@
             tempDiv.innerHTML = text;
             const cleanText = tempDiv.textContent || tempDiv.innerText || "";
 
-            const utterance = new SpeechSynthesisUtterance(cleanText);
+            // Use ElevenLabs for realistic voice
+            playElevenLabsAudio(cleanText);
+        }
+
+        async function playElevenLabsAudio(text) {
+            if (!text) return;
+
+            updateStatus('speaking');
+            avatarPulse.classList.add('animate-ping');
+            isSpeaking = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/tts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: text,
+                        voice_id: selectedVoice
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('[ElevenLabs] Error:', errorData);
+                    throw new Error(errorData.error || 'TTS failed');
+                }
+
+                const data = await response.json();
+
+                // Play the audio
+                const audio = new Audio(`data:audio/mpeg;base64,${data.audio}`);
+
+                audio.onended = () => {
+                    isSpeaking = false;
+                    avatarPulse.classList.remove('animate-ping');
+                    updateStatus('connected');
+                };
+
+                audio.onerror = (e) => {
+                    console.error('[Audio] Error:', e);
+                    isSpeaking = false;
+                    avatarPulse.classList.remove('animate-ping');
+                    updateStatus('connected');
+                };
+
+                audio.play();
+
+            } catch (error) {
+                console.error('[ElevenLabs] Playback error:', error);
+                // Fallback to browser speech
+                fallbackSpeakText(text);
+                isSpeaking = false;
+                avatarPulse.classList.remove('animate-ping');
+                updateStatus('connected');
+            }
+        }
+
+        // Fallback to browser speech synthesis
+        function fallbackSpeakText(text, langCode = 'en-US') {
+            if (synth.speaking) synth.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
             const voices = synth.getVoices();
 
-            // Smarter Voice Selection
-            // 1. Match Exact Language
             let availableVoices = voices.filter(v => v.lang.startsWith(langCode.split('-')[0]));
-
-            // 2. Look for Premium Keywords
             let preferredVoice = availableVoices.find(v =>
                 v.name.includes('Google') ||
                 v.name.includes('Neural') ||
@@ -699,22 +839,14 @@
                 v.name.includes('Premium')
             );
 
-            // 3. Fallback to just matching language or default
             if (!preferredVoice && availableVoices.length > 0) preferredVoice = availableVoices[0];
 
             if (preferredVoice) {
                 utterance.voice = preferredVoice;
-                console.log(`[Voice] Speaking with: ${preferredVoice.name} (${preferredVoice.lang})`);
-            } else {
-                console.warn(`[Voice] No voice found for ${langCode}, using default.`);
             }
 
-            // Adjust rate/pitch for "Professional" feel
-            utterance.rate = 0.95; // Slightly slower
-            utterance.pitch = 0.9; // Slightly deeper if possible (though browser specific)
-
-            isSpeaking = true;
-            avatarPulse.classList.add('animate-ping');
+            utterance.rate = 0.95;
+            utterance.pitch = 0.9;
 
             utterance.onend = () => {
                 isSpeaking = false;
@@ -784,7 +916,7 @@
 
             } catch (error) {
                 console.error('Error:', error);
-                questionBox.innerHTML = '<span class="text-red-400 text-sm">Connection Failed. Check API_BASE in code.</span>';
+                questionBox.innerHTML = `<span class="text-red-400 text-sm">Connection Failed: ${error.message}. Make sure backend server is running at ${API_BASE}</span>`;
                 updateStatus('disconnected');
             }
         }
