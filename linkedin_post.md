@@ -1,21 +1,25 @@
-🚀 **Just Shipped: My New AI-Powered Interview Coach!** 🤖🎤
+# LinkedIn Post - AI Interview Platform
 
-I'm excited to share a project I've been working on: a fully **Humanoid AI Interviewer** that simulates real job interviews with voice interaction!
+🎙️ **Excited to share my latest project!**
 
-💡 **What it does:**
-This isn't just a text bot. The agent:
-✅ ** Speaks to you** using natural, clear Neural vocals.
-✅ **Listens to your answers** in real-time (no typing needed!).
-✅ **Adapts to Your Language**: Whether you prefer **English**, **Spanish**, **French**, or **Hindi**, the AI instantly switches contexts and conducts the interview seamlessly in your native tongue.
-✅ **Custom Tailored**: Upload your Resume/CV, and it generates specific questions based on your actual experience.
+I've built an **AI-Powered Interview Platform** that conducts real-time voice interviews with candidates.
 
-🛠️ **Under the Hood:**
-*   **Tech Stack**: Python (Flask) Backend + Vanilla JS Frontend.
-*   **AI Engine**: Powered by **Google Gemini LLM** for deep context understanding and dynamic conversation.
-*   **Voice**: Integrated Web Speech API for low-latency Speech-to-Text and Text-to-Speech.
+## Key Features:
+- 🗣️ Real-time voice interaction using Web Speech API
+- 🤖 AI-driven interview questions and follow-ups
+- ⚡ Instant feedback and evaluation
+- 🎨 Clean, modern UI with responsive design
 
-It's designed to help job seekers practice in a stress-free, realistic environment before the real deal.
+## Tech Stack:
+- Frontend: HTML5, CSS3, JavaScript
+- Backend: Python (optional for advanced features)
+- Hosting: Firebase
 
-Check out the demo below! 👇
+This project challenged me to think about:
+- Natural conversation flow in interviews
+- Real-time audio processing
+- User experience during high-stress situations
 
-#AI #MachineLearning #WebDevelopment #GeminiAPI #VoiceAI #JobSearch #Portfolio #FullStack #Python #Javascript
+Check it out and let me know your thoughts! 💭
+
+#WebDevelopment #AI #JavaScript #Firebase #VoiceUI #InterviewTech #Portfolio
